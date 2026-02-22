@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const validator = require("express-validator");
 const Schema = mongoose.Schema;
+
 const userSchema = new mongoose.Schema({
     fullname:{
         type: String,
@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         unique:true,
         required: true,
-        validate:[validator.isEmail,'يرجى إدخال بريد إلكتروني صحيح']
     },
     password:{
         type: String,
@@ -21,7 +20,19 @@ const userSchema = new mongoose.Schema({
     },
     otp: {
         code: String,
-        expiresAt: Date
+        expiresAt: Date,
+        attempts: {
+            type: Number,
+            default: 0
+        },
+        lastSentAt: Date
+    },
+    loginAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockUntil: {
+        type: Date
     },
     isEmailVerified: {
         type: Boolean,
@@ -46,6 +57,5 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-
 let User = mongoose.model('User',userSchema,'user'); 
-module.exports = User ; 
+module.exports = User;

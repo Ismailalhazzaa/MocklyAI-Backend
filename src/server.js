@@ -2,6 +2,7 @@ const express = require("express") ;
 const cors = require('cors');
 require("./config/databaseConnection");
 const mongoose = require('mongoose');
+const userRoutes = require("./routes/user.routes");
 require('dotenv').config() ;
 
 const PORT = process.env.PORT || 4000 ; 
@@ -19,7 +20,7 @@ server.use(express.json());
 server.use(cors(corsOptions));
 server.use(express.urlencoded({ extended: true }));
 
-
+server.use("/api/users", userRoutes);
 
 
 server.use((error,req,res,next)=>{
