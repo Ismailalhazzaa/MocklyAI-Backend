@@ -13,17 +13,20 @@ const sessionSchema = new mongoose.Schema({
     numberOfQuestions:{
         type: Number,
         required: true,
+        enum: [3, 5, 10, 15],
         default: 5
     },
     questionTypes: {
         type: [String],
         enum: ["text", "voice"],
-        default: ["text"]
+        default: ["text"],
+        required: true
     },
     difficultyLevel: {
         type: String,
         enum: ["Beginner", "Intermediate", "Advanced"],
-        default: "Intermediate"
+        default: "Intermediate",
+        required: true
     },
     currentQuestionNumber: {
         type: Number,
@@ -35,7 +38,7 @@ const sessionSchema = new mongoose.Schema({
     durationMinutes: {
         type: Number
     },
-    endedForced: {
+    ended: {
         type: Boolean,
         default: false
     },
