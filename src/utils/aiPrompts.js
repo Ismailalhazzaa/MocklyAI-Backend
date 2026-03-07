@@ -136,11 +136,44 @@ Rules:
 
 JSON format:
 {
-  "overallScore": number,
-  "technicalLevel": "Beginner | Intermediate | Advanced",
-  "strengths": ["string"],
-  "weaknesses": ["string"],
-  "finalRecommendation": "string"
+    score: {
+        type: Number,
+        min: 0,
+        max: 100
+    },
+    aiEvaluation: {
+        clarity: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        confidence: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        relevance: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        organization: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        engagement: {
+            type: Number,
+            min: 0,
+            max: 100
+        }
+    },
+    strengths: {
+        type: [String]
+    },
+    improvements: {
+        type: [String]
+    }
 }
 `
         },
