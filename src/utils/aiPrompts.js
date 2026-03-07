@@ -44,7 +44,7 @@ Generate a new unique question and its canonical form.
     ];
 };
 
-const buildAnswerAnalysisPrompt = (question, answer, difficulty) => {
+const buildAnswerAnalysisPrompt = (question, answer) => {
     return [
         {
             role: "system",
@@ -61,11 +61,44 @@ Rules:
 
 JSON format:
 {
-  "score": number,
-  "strengths": ["string"],
-  "weaknesses": ["string"],
-  "technicalFeedback": "string",
-  "improvementAdvice": "string"
+    score: {
+        type: Number,
+        min: 0,
+        max: 100
+    },
+    aiEvaluation: {
+        clarity: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        confidence: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        relevance: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        organization: {
+            type: Number,
+            min: 0,
+            max: 100
+        },
+        engagement: {
+            type: Number,
+            min: 0,
+            max: 100
+        }
+    },
+    strengths: {
+        type: [String]
+    },
+    improvements: {
+        type: [String]
+    }
 }
   If the candidate answer is written in Arabic, analyze it in Arabic.
 If it is mixed Arabic and English, understand both correctly.
@@ -74,7 +107,6 @@ If it is mixed Arabic and English, understand both correctly.
         {
             role: "user",
             content: `
-Difficulty: ${difficulty}
 
 Question:
 ${question}
