@@ -42,10 +42,6 @@ const sessionSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    numberOfSessions: {
-        type: Number,
-        default: 0
-    },
     score: {
         type: Number,
         min: 0,

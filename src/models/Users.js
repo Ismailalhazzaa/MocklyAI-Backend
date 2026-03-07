@@ -49,6 +49,10 @@ const userSchema = new mongoose.Schema({
     totalTrainingMinutes: {
         type: Number,
         default: 0
+    },
+    numberOfSessions: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true,

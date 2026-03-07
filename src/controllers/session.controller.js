@@ -1,6 +1,6 @@
 const Session = require("../models/Sessions");
 const appError = require("../utils/handelError.js");
-
+const User = require("../models/Users.js");
 
 const createSession = async (req, res, next) => {
     try {
@@ -16,6 +16,7 @@ const createSession = async (req, res, next) => {
             );
         }
         const session = await Session.create({ userId: req.currentUser.id, specialization: specialization, numberOfQuestions: numberOfQuestions, questionTypes: questionTypes, difficultyLevel: difficultyLevel });
+        const user = await User.findByIdAndUpdate(req.currentUser.id, { $inc: { numberOfSessions: 1 } });
         res.status(201).json({ status: "SUCCESS", data: "تم إنشاء الجلسة بنجاح", sessionId: session._id });
     } catch (error) {
         return next(
