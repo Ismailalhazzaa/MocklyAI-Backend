@@ -30,7 +30,7 @@ const sessionSchema = new mongoose.Schema({
     },
     currentQuestionNumber: {
         type: Number,
-        default: 1
+        default: 0
     },
     endedAt: {
         type: Date
