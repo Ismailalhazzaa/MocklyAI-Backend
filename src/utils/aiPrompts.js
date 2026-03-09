@@ -12,6 +12,8 @@ Rules:
 - Do NOT repeat previous concepts.
 - Also generate a canonical version of the question.
 - The category field must be one form this array : ["general", "behavioral", "technical"].
+- You MUST rotate between all three categories to ensure variety.
+- Do not generate any non-arabic words or chars.
 
 Canonical rules:
 - Must represent the core concept only.
@@ -56,6 +58,7 @@ Rules:
 - Score must be between 0 and 10.
 - All feedback content MUST be written in Arabic.
 - Technical terms may remain in English when necessary.
+- Do not generate any non-arabic words or chars.
 - Do NOT add explanations outside JSON.
 - Return ONLY valid JSON.
 
@@ -130,6 +133,8 @@ Rules:
 - Provide a realistic and fair overall score from 0 to 10.
 - Determine the technical level accurately.
 - All feedback content MUST be written in Arabic.
+- Technical terms may remain in English when necessary.
+- Do not generate any non-arabic words or chars.
 - Be constructive and professional.
 - Do NOT write anything outside JSON.
 - Return ONLY valid JSON.
