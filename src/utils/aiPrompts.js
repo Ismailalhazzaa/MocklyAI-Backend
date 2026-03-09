@@ -13,6 +13,9 @@ Rules:
 - Also generate a canonical version of the question.
 - The category field must be one form this array : ["general", "behavioral", "technical"].
 - You MUST rotate between all three categories to ensure variety.
+- General refers to personal questions about the person and their past experiences.
+- Behavioral questions refer to those related to dealing with problems and the most appropriate ways to solve them.
+- Technical this refers to questions related to the field of specialization.
 - Do not generate any non-arabic words or chars.
 
 Canonical rules:
