@@ -160,18 +160,6 @@ const updateUser = async (req, res, next) => {
     }
 };
 
-const deleteUser = async (req, res, next) => {
-    try {
-        const user = await User.findByIdAndDelete(req.currentUser.id);
-        if (!user) {
-            return next(appError.create("المستخدم غير موجود", 422, false));
-        }
-        res.status(200).json({ status: "SUCCESS", data: "تم حذف المستخدم بنجاح" });
-    } catch (error) {
-        return next(appError.create("حدث خطأ أثناء عملية حذف المستخدم, يرجى إعادة المحاولة", 500, false));
-    }
-};
-
 const sendOTP = async (req, res, next) => {
     try {
     const { email } = req.body;
@@ -326,7 +314,6 @@ module.exports = {
     sendOTP,
     signup,
     forgotPassword,
-    deleteUser,
     verifyOTP,
     updateUser,
     logout,

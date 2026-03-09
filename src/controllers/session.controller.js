@@ -37,7 +37,7 @@ const getUserSessions = async (req, res, next) => {
         const page = req.query.page || 1;
         const skip = (page - 1) * limit;
         const sessions = await Session.find({ userId: req.currentUser.id }).limit(limit).skip(skip);
-        if (!sessions) {
+        if (!sessions.length) {
             return next(
                 appError.create("لا يوجد أي جلسات سابقة لعرضها", 400, false)
             );
@@ -61,7 +61,7 @@ const endSession = async (req, res, next) => {
             return next(appError.create("الجلسة انتهت و تم تقييمها بالفعل", 400, false));
         }
         const sessionQuestions = await Question.find({ sessionId: sessionId });
-        if (!sessionQuestions) {
+        if (!sessionQuestions.length) {
             return next(appError.create("لا يوجد أسئلة في هذه الجلسة", 400, false));
         }
         const questionIds = sessionQuestions.map(q => q._id);
@@ -76,22 +76,21 @@ const endSession = async (req, res, next) => {
         const prompt = buildSessionAnalysisPrompt(questionsWithAnswersForEvaluation);
         const aiFullSessionEvaluation = await generateAIResponse(prompt);
         const recommendations = softSkillsRecommendations(aiFullSessionEvaluation);
-        session.score = aiFullSessionEvaluation.score;
-        session.aiEvaluation.clarity = aiFullSessionEvaluation.aiEvaluation.clarity;
-        session.aiEvaluation.confidence = aiFullSessionEvaluation.aiEvaluation.confidence;
-        session.aiEvaluation.relevance = aiFullSessionEvaluation.aiEvaluation.relevance;
-        session.aiEvaluation.organization = aiFullSessionEvaluation.aiEvaluation.organization;
-        session.aiEvaluation.engagement = aiFullSessionEvaluation.aiEvaluation.engagement;
-        session.strengths = aiFullSessionEvaluation.strengths;
-        session.improvements = aiFullSessionEvaluation.improvements;
         const durationMinutes = Math.floor(
-        (Date.now() - session.createdAt.getTime()) / 60000);
-        session.endedAt = new Date();
-        session.durationMinutes = durationMinutes;
-        session.softSkillsRecommendations = recommendations;
-        session.ended = true;
+            (Date.now() - session.createdAt.getTime()) / 60000
+        );
+        session.set({
+            score: aiFullSessionEvaluation.score,
+            aiEvaluation: { ...aiFullSessionEvaluation.aiEvaluation },
+            strengths: aiFullSessionEvaluation.strengths,
+            improvements: aiFullSessionEvaluation.improvements,
+            softSkillsRecommendations: recommendations,
+            endedAt: new Date(),
+            durationMinutes,
+            ended: true
+        });
         await session.save();
-        await User.findByIdAndUpdate(req.currentUser.id, {$inc: {totalTrainingMinutes: durationMinutes}});
+        await User.findByIdAndUpdate(req.currentUser.id, { $inc: { totalTrainingMinutes: durationMinutes } });
         res.status(200).json({ status: "SUCCESS", data: session });
     } catch (error) {
         return next(

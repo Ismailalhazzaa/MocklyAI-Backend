@@ -14,7 +14,6 @@ router.route("/verify-otp").post(otpLimiter, userController.verifyOTP);
 router.route("/forgot-password").post(otpLimiter, userController.forgotPassword);
 router.route("/resend-otp").post(otpLimiter, userController.resendOTP);
 router.route("/reset-password").post(otpLimiter, userController.resetPassword);
-router.route("/delete-user").delete(verify_token, userController.deleteUser);
 router.route("/update-user").put(verify_token, userController.updateUser);
 
 
