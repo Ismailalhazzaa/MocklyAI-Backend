@@ -1,6 +1,6 @@
 const appError = require('../utils/handelError');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); 
+const User = require('../models/Users'); 
 
 const verifyToken = async (req, res, next) => { 
     const authHeader = req.headers['Authorization'] || req.headers['authorization'];
