@@ -38,10 +38,6 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    totalSessions: {
-        type: Number,
-        default: 0
-    },
     averageScore: {
         type: Number,
         default: 0

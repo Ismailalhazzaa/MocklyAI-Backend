@@ -6,7 +6,9 @@ const Answer = require("../models/Answers.js");
 const { generateAIResponse } = require("../utils/aiService.js");
 const { buildSessionAnalysisPrompt } = require("../utils/aiPrompts.js");
 const { softSkillsRecommendations } = require("../utils/softSkillsRecommendations.js");
-
+const path = require('path');
+const fs = require("fs");
+const XLSX = require('xlsx');
 
 const createSession = async (req, res, next) => {
     try {
@@ -89,8 +91,17 @@ const endSession = async (req, res, next) => {
             durationMinutes,
             ended: true
         });
+        const user = await User.findById(req.currentUser.id);
+        const newAverageScore = Math.round(
+            ((user.averageScore * user.numberOfSessions) + aiFullSessionEvaluation.score) / (user.numberOfSessions)
+        );
         await session.save();
-        await User.findByIdAndUpdate(req.currentUser.id, { $inc: { totalTrainingMinutes: durationMinutes } });
+        await User.findByIdAndUpdate(req.currentUser.id, {
+            $inc: {
+                totalTrainingMinutes: durationMinutes,
+            },
+            averageScore: newAverageScore
+        });
         res.status(200).json({ status: "SUCCESS", data: session });
     } catch (error) {
         return next(
@@ -99,14 +110,64 @@ const endSession = async (req, res, next) => {
     }
 };
 
+const exportUserStatistic = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        const user = await User.findById(userId);
 
+        if (!user) {
+            return res.status(404).json({ status: false, message: 'المستخدم غير موجود' });
+        }
 
+        const data = [{
+            'معرف المستخدم': user.id,
+            'اسم المستخدم': user.fullname, // تضمين اسم المستخدم
+            'عدد الجلسات المنفذة': user.numberOfSessions,
+            'عدد الدقائق التدريبية': user.totalTrainingMinutes,
+            'متوسط التقييمات في كل الجلسات': user.averageScore,
+        }];
 
+        // إنشاء ملف Excel وتحسين تنسيق الجدول
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(data, {
+            header: ['معرف المستخدم', 'اسم المستخدم', 'عدد الجلسات المنفذة', 'عدد الدقائق التدريبية', 'متوسط التقييمات في كل الجلسات'],
+            skipHeader: false
+        });
+
+        // تحسين عرض الجدول
+        worksheet['!cols'] = [
+            { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }
+        ];
+
+        // إضافة الورقة إلى الملف
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'إحصائيات المتسخدم');
+
+        // تحديد المسار الصحيح لحفظ الملف
+        const filePath = path.join(__dirname, `./user_statistics_${user.fullname}.xlsx`);
+        XLSX.writeFile(workbook, filePath);
+
+        // إرسال الملف للتحميل
+        res.download(filePath, `user_statistics_${user.fullname}.xlsx`, (err) => {
+            if (err) {
+            return next(new Error('حدث خطأ أثناء تحميل الملف'));
+            }
+            setTimeout(() => {
+            fs.unlink(filePath, (unlinkErr) => {
+                if (unlinkErr) console.error('خطأ أثناء حذف الملف:', unlinkErr);
+            });
+            }, 5000);
+        });
+
+    } catch (error) {
+        return next(new Error(error.message));
+    }
+};
 
 
 
 module.exports = {
     createSession,
     getUserSessions,
-    endSession
+    endSession,
+    exportUserStatistic
 }
