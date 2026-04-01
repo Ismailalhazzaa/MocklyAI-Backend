@@ -45,7 +45,8 @@ const sessionSchema = new mongoose.Schema({
     score: {
         type: Number,
         min: 0,
-        max: 100
+        max: 100,
+        default: 0
     },
     aiEvaluation: {
         clarity: {
