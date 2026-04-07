@@ -159,15 +159,42 @@ const exportUserStatistic = async (req, res, next) => {
         });
 
     } catch (error) {
-        return next(new Error(error.message));
+        return next(appError.create("حدث خطأ أثناء عملية انتاج ملف الاحصائيات", 500, false));
     }
 };
 
-
+const getSessionDetails = async (req, res, next) => {
+    try {
+        const sessionId = req.params.sessionId;
+        const session = await Session.findById(sessionId);
+        if (!session) {
+            return next(appError.create("الجلسة غير موجودة", 400, false));
+        }
+        // get the session questions and the score of each question
+        const sessionQuestions = await Question.find({ sessionId: sessionId });
+        if (!sessionQuestions.length) {
+            return next(appError.create("لا يوجد أسئلة في هذه الجلسة", 400, false));
+        }
+        const questionIds = sessionQuestions.map(q => q._id);
+        const answers = await Answer.find({ questionId: { $in: questionIds } });
+        const questionsWithScores = sessionQuestions.map(q => {
+            const answer = answers.find(a => a.questionId.toString() === q._id.toString());
+            return {
+                question: q.questionText,
+                score: answer.score
+            };
+        });
+        const sessionDetails = { session: session, questions: questionsWithScores };
+        res.status(200).json({ status: "SUCCESS", data: sessionDetails });
+    } catch (error) {
+        return next(appError.create("حدث خطأ أثناء عملية عرض تفاصيل الجلسة, يرجى المحاولة مرة أخرى", 500, false));
+    }
+};
 
 module.exports = {
     createSession,
     getUserSessions,
     endSession,
-    exportUserStatistic
+    exportUserStatistic,
+    getSessionDetails
 }
