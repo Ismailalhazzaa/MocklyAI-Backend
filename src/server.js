@@ -6,6 +6,7 @@ const userRoutes = require("./routes/user.routes");
 const sessionRoutes = require("./routes/session.routes");
 const questionRoutes = require("./routes/question.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const leaderboardRoutes = require("./routes/leaderboard.routes");
 require('dotenv').config() ;
 
 const PORT = process.env.PORT || 4000 ; 
@@ -27,6 +28,7 @@ server.use("/api/users", userRoutes);
 server.use("/api/sessions", sessionRoutes);
 server.use("/api/questions", questionRoutes);
 server.use("/api/dashboard", dashboardRoutes);
+server.use("/api/leaderboard", leaderboardRoutes);
 
 server.use((error,req,res,next)=>{
     res.status(error.statusCode || 500).json({status:false ,message:error.message,errors:error.errors , data: null})
