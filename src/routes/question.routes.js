@@ -36,8 +36,7 @@ const uploadVoice = multer({
 
 router.route("/create-question/:sessionId").get(verify_token, questionController.createQuestion);
 router.route("/analysis-answer/:questionId").post(verify_token, uploadVoice.single("audio"), questionController.analysisAnswer);
-
-
+router.route("/most-frequently-questions").get(verify_token, questionController.getTopQuestions);
 
 
 

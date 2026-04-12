@@ -86,9 +86,50 @@ const speechToTextTranscribe = async (file) => {
     }
 };
 
+const getTopQuestions = async (req, res, next) => {
+    try {
+    const { specialization } = req.query;
 
+    const pipeline = [];
+
+    if (specialization) {
+        pipeline.push({
+            $match: { specialization }
+        });
+    }
+
+    pipeline.push(
+        {
+        $group: {
+            _id: "$canonicalText",
+            questionText: { $first: "$questionText" },
+            count: { $sum: 1 }
+        }
+        },
+        {
+        $sort: { count: -1 }
+        },
+        {
+        $limit: 10
+        }
+    );
+
+    const result = await Question.aggregate(pipeline);
+
+    res.status(200).json({
+        status: "SUCCESS",
+        data: result
+    });
+
+    } catch (error) {
+    return next(
+        appError.create("حدث خطأ أثناء جلب الأسئلة الأكثر تكراراً", 500, false)
+    );
+    }
+};
 
 module.exports = {
     createQuestion,
-    analysisAnswer
+    analysisAnswer,
+    getTopQuestions
 };
