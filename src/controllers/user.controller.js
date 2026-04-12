@@ -5,6 +5,7 @@ const { sendMail } = require("../utils/sendMail");
 const generateJwt = require('../utils/genrateJWT');
 const appError = require("../utils/handelError.js");
 const { validationResult } = require("express-validator");
+const Feedback = require("../models/Feedback.js");
 
 const login = async (req, res, next) => {
     try {
@@ -309,6 +310,22 @@ const resetPassword = async (req, res, next) => {
     }
 };
 
+const feedBackFromUser = async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return next(appError.create("بيانات غير صالحة", 400, false));
+        }
+        const { name, email, feedbacktext } = req.body;
+        await Feedback.create({ name: name, email: email, feedbacktext: feedbacktext });
+        res.status(200).json({ status: "SUCCESS", data: "تم إرسال الرسالة بنجاح, سيتم التواصل معك قريباً, نشكرك على ثقتك ❤️" });
+    } catch (error) {
+        return next(
+            appError.create("حدث خطأ أثناء عملية إرسال الرسالة, يرجى إعادة المحاولة", 500, false)
+        );
+    }
+};
+
 module.exports = {
     login,
     sendOTP,
@@ -318,5 +335,6 @@ module.exports = {
     updateUser,
     logout,
     resendOTP,
-    resetPassword
+    resetPassword,
+    feedBackFromUser
 };
