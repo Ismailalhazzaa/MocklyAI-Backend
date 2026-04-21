@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const verify_token = require('../middlewares/verifyToken');
 const questionController = require("../controllers/question.controller");
+const { aiLimiter, generalLimiter } = require("../middlewares/rateLimiter");
 const multer = require("multer");
 
 const storage = multer.memoryStorage();
@@ -34,9 +35,9 @@ const uploadVoice = multer({
     fileFilter
 });
 
-router.route("/create-question/:sessionId").get(verify_token, questionController.createQuestion);
-router.route("/analysis-answer/:questionId").post(verify_token, uploadVoice.single("audio"), questionController.analysisAnswer);
-router.route("/most-frequently-questions").get(verify_token, questionController.getTopQuestions);
+router.route("/create-question/:sessionId").get(verify_token, aiLimiter, questionController.createQuestion);
+router.route("/analysis-answer/:questionId").post(verify_token, aiLimiter, uploadVoice.single("audio"), questionController.analysisAnswer);
+router.route("/most-frequently-questions").get(verify_token, generalLimiter, questionController.getTopQuestions);
 
 
 
