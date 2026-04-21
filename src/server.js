@@ -1,6 +1,8 @@
 const express = require("express") ; 
 const cors = require('cors');
 require("./config/databaseConnection");
+require("./config/firebase");
+require("./utils/notificationCron");
 const mongoose = require('mongoose');
 const userRoutes = require("./routes/user.routes");
 const sessionRoutes = require("./routes/session.routes");

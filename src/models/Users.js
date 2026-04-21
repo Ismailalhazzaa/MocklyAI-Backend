@@ -49,6 +49,13 @@ const userSchema = new mongoose.Schema({
     numberOfSessions: {
         type: Number,
         default: 0
+    },
+    lastLogin: {
+    type: Date
+    },
+    fcmToken: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true,

@@ -38,6 +38,7 @@ const login = async (req, res, next) => {
         user.lockUntil = undefined;
         const token = await generateJwt({email:user.email, id:user._id, username:user.username});
         user.token = token;
+        user.lastLogin = new Date();
         await user.save();
         return res.status(200).json({
             status: true,
@@ -326,6 +327,19 @@ const feedBackFromUser = async (req, res, next) => {
     }
 };
 
+const saveFCMToken = async (req, res, next) => {
+    try {
+        const { fcmToken } = req.body;
+        const user = await User.findByIdAndUpdate(req.currentUser.id, { fcmToken: fcmToken }, { new: true });
+        if (!user) return res.status(404).json({ message: "المستخدم غير موجود, يرجى إعادة المحاولة" });
+        res.status(200).json({ status: "SUCCESS", data: "تم تفعيل الإشعارات بنجاح" });
+    } catch (error) {
+        return next(
+            appError.create("حدث خطأ أثناء عملية تفعيل الإشعارات, يرجى إعداة المحاولة لاحقاً", 500, false)
+        );
+    }
+}
+
 module.exports = {
     login,
     sendOTP,
@@ -336,5 +350,6 @@ module.exports = {
     logout,
     resendOTP,
     resetPassword,
-    feedBackFromUser
+    feedBackFromUser,
+    saveFCMToken
 };

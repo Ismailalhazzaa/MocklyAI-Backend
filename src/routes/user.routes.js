@@ -16,6 +16,7 @@ router.route("/resend-otp").post(otpLimiter, userController.resendOTP);
 router.route("/reset-password").post(otpLimiter, userController.resetPassword);
 router.route("/update-user").put(verify_token, userController.updateUser);
 router.route("/feedback").post(userController.feedBackFromUser);
+router.route("/save-fcm-token").post(verify_token, userController.saveFCMToken);
 
 
 
