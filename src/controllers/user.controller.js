@@ -3,7 +3,7 @@ const bcryptjs = require('bcryptjs');
 const { generateOTP } = require("../utils/generateOTP");
 const { sendMail } = require("../utils/sendMail");
 const generateJwt = require('../utils/genrateJWT');
-const appError = require("../utils/handelError.js");
+const AppError = require("../utils/handelError.js");
 const { validationResult } = require("express-validator");
 const Feedback = require("../models/Feedback.js");
 
@@ -11,18 +11,18 @@ const login = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return next(appError.create("بيانات غير صالحة", 400, false));
+            return next(AppError.create("بيانات غير صالحة", 400, false));
         }
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
-            return next(appError.create("المستخدم غير موجود", 422, false));
+            return next(AppError.create("المستخدم غير موجود", 422, false));
         }
         if (user.lockUntil && user.lockUntil > Date.now()) {
-            return next(appError.create("الحساب محظور مؤقتاً", 423, false));
+            return next(AppError.create("الحساب محظور مؤقتاً", 423, false));
         }
         if (!user.isEmailVerified) {
-            return next(appError.create("هذا الحساب غير مؤكد", 401, false));
+            return next(AppError.create("هذا الحساب غير مؤكد", 401, false));
         }
         const matchedPasswords = await bcryptjs.compare(password, user.password);
         if (!matchedPasswords) {
@@ -31,12 +31,12 @@ const login = async (req, res, next) => {
                 user.lockUntil = Date.now() + 10 * 60 * 1000; // 10 دقائق
             }
             await user.save();
-            return next(appError.create("كلمة المرور غير صحيحة", 401, false));
+            return next(AppError.create("كلمة المرور غير صحيحة", 401, false));
         }
         // نجاح login
         user.loginAttempts = 0;
         user.lockUntil = undefined;
-        const token = await generateJwt({email:user.email, id:user._id, username:user.username});
+        const token = await generateJwt({email:user.email, id:user._id, username:user.fullname});
         user.token = token;
         user.lastLogin = new Date();
         await user.save();
@@ -46,7 +46,7 @@ const login = async (req, res, next) => {
             data: { user }
         });
     } catch (err) {
-        return next(appError.create("حدث خطأ, يرجى إعادة المحاولة", 500, false));
+        return next(AppError.create("حدث خطأ, يرجى إعادة المحاولة", 500, false));
     }
 };
 
@@ -55,14 +55,14 @@ const signup = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return next(
-            appError.create("حدث حطأ , يرجى التحقق من المعلومات التي تم إدخالها", 400, false)
+            AppError.create("حدث حطأ , يرجى التحقق من المعلومات التي تم إدخالها", 400, false)
     );
     }
     const { fullname, email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
         return next(
-        appError.create("هذا البريد مستخدم مسبقاً", 400, false)
+        AppError.create("هذا البريد مستخدم مسبقاً", 400, false)
         );
     }
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -83,7 +83,7 @@ const signup = async (req, res, next) => {
         message: "تم إنشاء الحساب. يرجى تأكيد البريد الإلكتروني"
     });
     } catch (err) {
-        const error = appError.create(
+        const error = AppError.create(
         "حدث خطأ, يرجى إعادة المحاولة",
         500,
         false
@@ -96,14 +96,14 @@ const logout = async (req, res, next) => {
     try {
         const user = await User.findById(req.currentUser.id);
         if(!user){
-            const error = appError.create("المستخدم غير موجود", 302, false);
+            const error = AppError.create("المستخدم غير موجود", 302, false);
             return next(error)
         }
         user.token = null ; 
         user.save();
         res.status(200).send({ status: true, message: "SUCCSESS", data: null });
     } catch (error) {
-        const er = appError.create("حدث حطأ, يرجى إعادة المحاولة", 302, false);
+        const er = AppError.create("حدث حطأ, يرجى إعادة المحاولة", 302, false);
         return next(er);
     }
 };
@@ -113,13 +113,13 @@ const forgotPassword = async (req, res, next) => {
         const { email } = req.body;
         if (!email) {
             return next(
-                appError.create("البريد الإلكتروني مطلوب", 400, false)
+                AppError.create("البريد الإلكتروني مطلوب", 400, false)
             );
         }
         const user = await User.findOne({ email });
         if (!user) {
             return next(
-                appError.create("المستخدم غير موجود", 404, false)
+                AppError.create("المستخدم غير موجود", 404, false)
             );
         }
         const otpCode = generateOTP();
@@ -135,7 +135,7 @@ const forgotPassword = async (req, res, next) => {
         });
     } catch (err) {
         return next(
-            appError.create("حدث خطأ أثناء طلب إعادة تعيين كلمة السر", 500, false)
+            AppError.create("حدث خطأ أثناء طلب إعادة تعيين كلمة السر", 500, false)
         );
     }
 };
@@ -145,19 +145,19 @@ const updateUser = async (req, res, next) => {
     try {
         if (!fullname) {
             return next(
-                appError.create("الأسم الكامل مطلوب", 400, false)
+                AppError.create("الأسم الكامل مطلوب", 400, false)
             );
         }
         const updatedUser = await User.findByIdAndUpdate(req.currentUser.id, { fullname }, { new: true });
         if (!updatedUser) {
             return next(
-                appError.create("فشلت عملية تحديث المعلومات", 400, false)
+                AppError.create("فشلت عملية تحديث المعلومات", 400, false)
             );
         }
         res.status(201).json({ status: "SUCCESS", data: "تم تحديث معلومات المستخدم بنجاح" });
     } catch (error) {
         return next(
-            appError.create("حدث خطأ أثناء عملية تحديث المعلومات", 500, false)
+            AppError.create("حدث خطأ أثناء عملية تحديث المعلومات", 500, false)
         );
     }
 };
@@ -166,11 +166,11 @@ const sendOTP = async (req, res, next) => {
     try {
     const { email } = req.body;
     if (!email) {
-        return next(appError.create("البريد الالكتروني مطلوب", 400, false));
+        return next(AppError.create("البريد الالكتروني مطلوب", 400, false));
     }
     const user = await User.findOne({ email });
     if (!user) {
-        return next(appError.create("المستخدم غير موجود", 404, false));
+        return next(AppError.create("المستخدم غير موجود", 404, false));
     }
     const otpCode = generateOTP();
     user.otp = {
@@ -181,7 +181,7 @@ const sendOTP = async (req, res, next) => {
     await sendMail({ to: email, OTP: otpCode });
     res.status(200).json({ status: "SUCCESS", message: "تم ارسال رمز التحقق" });
     } catch (err) {
-        appError.create("حدث خطأ أثناء إرسال رمز التحقق", 500, false)
+        AppError.create("حدث خطأ أثناء إرسال رمز التحقق", 500, false)
     }
 };
 
@@ -190,24 +190,24 @@ const verifyOTP = async (req, res, next) => {
         const { email, code } = req.body;
         const user = await User.findOne({ email });
         if (!user || !user.otp || !user.otp.code) {
-            return next(appError.create("رمز التحقق غير صحيح", 400, false));
+            return next(AppError.create("رمز التحقق غير صحيح", 400, false));
         }
         // إذا الحساب محظور
         if (user.lockUntil && user.lockUntil > Date.now()) {
-            return next(appError.create("الحساب محظور مؤقتاً", 423, false));
+            return next(AppError.create("الحساب محظور مؤقتاً", 423, false));
         }
         if (user.otp.expiresAt < Date.now()) {
-            return next(appError.create("انتهت صلاحية رمز التحقق", 400, false));
+            return next(AppError.create("انتهت صلاحية رمز التحقق", 400, false));
         }
         if (user.otp.code !== code) {
             user.otp.attempts += 1;
             if (user.otp.attempts >= 5) {
                 user.lockUntil = Date.now() + 5 * 60 * 1000; // 5 دقائق
                 await user.save();
-                return next(appError.create("تم حظر المحاولات مؤقتاً", 429, false));
+                return next(AppError.create("تم حظر المحاولات مؤقتاً", 429, false));
             }
             await user.save();
-            return next(appError.create("رمز التحقق خاطئ", 400, false));
+            return next(AppError.create("رمز التحقق خاطئ", 400, false));
         }
         // نجاح
         user.isEmailVerified = true;
@@ -216,7 +216,7 @@ const verifyOTP = async (req, res, next) => {
         await user.save();
         res.status(200).json({ status: "SUCCESS", message: "تم تأكيد البريد الالكتروني" });
     } catch (err) {
-            appError.create("حدث خطأ أثناء تأكيد البريد الإلكتروني", 500, false)
+            AppError.create("حدث خطأ أثناء تأكيد البريد الإلكتروني", 500, false)
     }
 };
 
@@ -224,15 +224,15 @@ const resendOTP = async (req, res, next) => {
     try {
         const { email } = req.body;
         if (!email) {
-            return next(appError.create("البريد الإلكتروني مطلوب", 400, false));
+            return next(AppError.create("البريد الإلكتروني مطلوب", 400, false));
         }
         const user = await User.findOne({ email });
         if (!user) {
-            return next(appError.create("المستخدم غير موجود", 404, false));
+            return next(AppError.create("المستخدم غير موجود", 404, false));
         }
         const COOLDOWN = 60 * 1000; // دقيقة
         if (user.otp?.lastSentAt && Date.now() - user.otp.lastSentAt < COOLDOWN) {
-            return next(appError.create("انتظر قبل طلب رمز جديد", 400, false));
+            return next(AppError.create("انتظر قبل طلب رمز جديد", 400, false));
         }
         const otpCode = generateOTP();
         user.otp = {
@@ -248,7 +248,7 @@ const resendOTP = async (req, res, next) => {
             message: "تم إعادة إرسال رمز التحقق"
         });
     } catch (err) {
-        return next(appError.create("حدث خطأ أثناء إعادة إرسال رمز التحقق", 500, false));
+        return next(AppError.create("حدث خطأ أثناء إعادة إرسال رمز التحقق", 500, false));
     }
 }; 
 
@@ -257,7 +257,7 @@ const resetPassword = async (req, res, next) => {
         const { email, code, newPassword } = req.body;
         if (!email || !code || !newPassword) {
             return next(
-                appError.create(
+                AppError.create(
                     "جميع الحقول مطلوبة",
                     400,
                     false
@@ -267,7 +267,7 @@ const resetPassword = async (req, res, next) => {
         const user = await User.findOne({ email });
         if (!user || !user.otp || !user.otp.code) {
             return next(
-                appError.create(
+                AppError.create(
                     "رمز التحقق غير صالح",
                     400,
                     false
@@ -276,7 +276,7 @@ const resetPassword = async (req, res, next) => {
         }
         if (user.otp.expiresAt < Date.now()) {
             return next(
-                appError.create(
+                AppError.create(
                     "انتهت صلاحية رمز التحقق",
                     400,
                     false
@@ -285,7 +285,7 @@ const resetPassword = async (req, res, next) => {
         }
         if (user.otp.code !== code) {
             return next(
-                appError.create(
+                AppError.create(
                     "رمز التحقق خاطئ",
                     400,
                     false
@@ -302,7 +302,7 @@ const resetPassword = async (req, res, next) => {
         });
     } catch (err) {
         return next(
-            appError.create(
+            AppError.create(
                 "حدث خطأ أثناء إعادة تعيين كلمة السر",
                 500,
                 false
@@ -315,14 +315,14 @@ const feedBackFromUser = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return next(appError.create("بيانات غير صالحة", 400, false));
+            return next(AppError.create("بيانات غير صالحة", 400, false));
         }
         const { name, email, feedbacktext } = req.body;
         await Feedback.create({ name: name, email: email, feedbacktext: feedbacktext });
         res.status(200).json({ status: "SUCCESS", data: "تم إرسال الرسالة بنجاح, سيتم التواصل معك قريباً, نشكرك على ثقتك ❤️" });
     } catch (error) {
         return next(
-            appError.create("حدث خطأ أثناء عملية إرسال الرسالة, يرجى إعادة المحاولة", 500, false)
+            AppError.create("حدث خطأ أثناء عملية إرسال الرسالة, يرجى إعادة المحاولة", 500, false)
         );
     }
 };
@@ -335,7 +335,7 @@ const saveFCMToken = async (req, res, next) => {
         res.status(200).json({ status: "SUCCESS", data: "تم تفعيل الإشعارات بنجاح" });
     } catch (error) {
         return next(
-            appError.create("حدث خطأ أثناء عملية تفعيل الإشعارات, يرجى إعداة المحاولة لاحقاً", 500, false)
+            AppError.create("حدث خطأ أثناء عملية تفعيل الإشعارات, يرجى إعداة المحاولة لاحقاً", 500, false)
         );
     }
 }

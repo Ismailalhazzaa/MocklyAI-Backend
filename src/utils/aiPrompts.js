@@ -30,7 +30,7 @@ Return ONLY valid JSON in this format:
 {
   "questionText": "string",
   "canonicalText": "string",
-    category: type: string
+    category: "string"
 }
 `
         },
@@ -58,7 +58,7 @@ You are a professional technical interviewer analyzing a candidate answer.
 
 Rules:
 - Be objective and strict.
-- Score must be between 0 and 10.
+- Score must be between 0 and 100.
 - All feedback content MUST be written in Arabic.
 - Technical terms may remain in English when necessary.
 - Do not generate any non-arabic words or chars.

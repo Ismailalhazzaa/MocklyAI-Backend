@@ -1,6 +1,6 @@
 const Question = require("../models/Questions");
 const Session = require("../models/Sessions.js");
-const appError = require("../utils/handelError.js");
+const AppError = require("../utils/handelError.js");
 const FormData = require("form-data");
 const Answer = require("../models/Answers.js");
 const axios = require("axios");
@@ -13,12 +13,12 @@ const createQuestion = async (req, res, next) => {
         const session = await Session.findById(sessionId);
         if (!session) {
             return next(
-                appError.create("لا يمكن انشاء سؤال لجلسة غير موجودة", 400, false)
+                AppError.create("لا يمكن انشاء سؤال لجلسة غير موجودة", 400, false)
             );
         }
         if (session.numberOfQuestions <= session.currentQuestionNumber) {
             return next(
-                appError.create("لقد بلغت الحد الأقصى لعدد أسئلة الجلسة", 400, false)
+                AppError.create("لقد بلغت الحد الأقصى لعدد أسئلة الجلسة", 400, false)
             );
         }
         const previousQuestions = await Question.find({ sessionId: sessionId }) || [];
@@ -30,7 +30,7 @@ const createQuestion = async (req, res, next) => {
         res.status(201).json({ status: "SUCCESS", data: question});
     } catch (error) {
         return next(
-            appError.create("حدث خطأ أثناء عملية إنشاء السؤال", 500, false)
+            AppError.create("حدث خطأ أثناء عملية إنشاء السؤال", 500, false)
         );
     }
 };
@@ -40,13 +40,13 @@ const analysisAnswer = async (req, res, next) => {
         const questionId = req.params.questionId;
         const question = await Question.findById(questionId);
         if (!question) {
-            return next(appError.create("لا يمكن إضافة جواب لسؤال غير موجود", 400, false));
+            return next(AppError.create("لا يمكن إضافة جواب لسؤال غير موجود", 400, false));
         }
         const { answerType } = req.body;
         if (answerType === "voice") {
             const file = req.file;
             if (!file) {
-                return next(appError.create("لم يتم تحميل الجواب الصوتي", 400, false));
+                return next(AppError.create("لم يتم تحميل الجواب الصوتي", 400, false));
             }
             const textAnswer = await speechToTextTranscribe(file);
             const prompt = buildAnswerAnalysisPrompt(question, textAnswer);
@@ -60,7 +60,7 @@ const analysisAnswer = async (req, res, next) => {
         const answer = await Answer.create({ questionId: questionId, textAnswer: answertext, score: aiAnalysis.score, aiEvaluation: aiAnalysis.aiEvaluation });
         res.status(200).json({ status: "SUCCESS", data: aiAnalysis });
     } catch (error) {
-        return next(appError.create("حدث خطأ أثناء عملية تحليل الجواب", 500, false));
+        return next(AppError.create("حدث خطأ أثناء عملية تحليل الجواب", 500, false));
     }
 };
 // method to connect with python service
@@ -123,7 +123,7 @@ const getTopQuestions = async (req, res, next) => {
 
     } catch (error) {
     return next(
-        appError.create("حدث خطأ أثناء جلب الأسئلة الأكثر تكراراً", 500, false)
+        AppError.create("حدث خطأ أثناء جلب الأسئلة الأكثر تكراراً", 500, false)
     );
     }
 };
