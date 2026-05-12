@@ -133,7 +133,7 @@ You are a senior technical interviewer analyzing a full mock interview session.
 
 Rules:
 - Evaluate the overall technical performance.
-- Provide a realistic and fair overall score from 0 to 10.
+- Provide a realistic and fair overall score from 0 to 100.
 - Determine the technical level accurately.
 - All feedback content MUST be written in Arabic.
 - Technical terms may remain in English when necessary.
