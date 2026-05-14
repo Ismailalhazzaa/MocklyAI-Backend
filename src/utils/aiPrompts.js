@@ -58,62 +58,32 @@ You are a professional technical interviewer analyzing a candidate answer.
 
 Rules:
 - Be objective and strict.
-- Score must be between 0 and 100.
+- All scores MUST be plain numbers between 0 and 100. NOT objects. NOT strings.
 - All feedback content MUST be written in Arabic.
 - Technical terms may remain in English when necessary.
-- Do not generate any non-arabic words or chars.
-- Do NOT add explanations outside JSON.
-- Return ONLY valid JSON.
+- Do NOT write anything outside JSON.
+- Return ONLY valid JSON with no extra text, no markdown, no backticks.
 
-JSON format:
+Return ONLY this exact JSON structure with real values:
 {
-    score: {
-        type: Number,
-        min: 0,
-        max: 100
+    "score": 75,
+    "aiEvaluation": {
+        "clarity": 80,
+        "confidence": 70,
+        "relevance": 75,
+        "organization": 65,
+        "engagement": 72
     },
-    aiEvaluation: {
-        clarity: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        confidence: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        relevance: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        organization: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        engagement: {
-            type: Number,
-            min: 0,
-            max: 100
-        }
-    },
-    strengths: {
-        type: [String]
-    },
-    improvements: {
-        type: [String]
-    }
+    "strengths": ["نقطة قوة أولى", "نقطة قوة ثانية"],
+    "improvements": ["مجال تحسين أول", "مجال تحسين ثانٍ"]
 }
-  If the candidate answer is written in Arabic, analyze it in Arabic.
+If the candidate answer is written in Arabic, analyze it in Arabic.
 If it is mixed Arabic and English, understand both correctly.
 `
         },
         {
             role: "user",
             content: `
-
 Question:
 ${question}
 
@@ -133,55 +103,24 @@ You are a senior technical interviewer analyzing a full mock interview session.
 
 Rules:
 - Evaluate the overall technical performance.
-- Provide a realistic and fair overall score from 0 to 100.
-- Determine the technical level accurately.
+- All scores MUST be plain numbers between 0 and 100. NOT objects. NOT strings.
 - All feedback content MUST be written in Arabic.
 - Technical terms may remain in English when necessary.
-- Do not generate any non-arabic words or chars.
-- Be constructive and professional.
 - Do NOT write anything outside JSON.
-- Return ONLY valid JSON.
+- Return ONLY valid JSON with no extra text, no markdown, no backticks.
 
-JSON format:
+Return ONLY this exact JSON structure with real values:
 {
-    score: {
-        type: Number,
-        min: 0,
-        max: 100
+    "score": 75,
+    "aiEvaluation": {
+        "clarity": 80,
+        "confidence": 70,
+        "relevance": 75,
+        "organization": 65,
+        "engagement": 72
     },
-    aiEvaluation: {
-        clarity: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        confidence: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        relevance: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        organization: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        engagement: {
-            type: Number,
-            min: 0,
-            max: 100
-        }
-    },
-    strengths: {
-        type: [String]
-    },
-    improvements: {
-        type: [String]
-    }
+    "strengths": ["نقطة قوة أولى", "نقطة قوة ثانية"],
+    "improvements": ["مجال تحسين أول", "مجال تحسين ثانٍ"]
 }
 `
         },
@@ -189,10 +128,8 @@ JSON format:
             role: "user",
             content: `
 Here is the full session data:
-
 ${JSON.stringify(questionsWithAnswers, null, 2)}
-
-Analyze the candidate performance.
+Analyze the candidate performance and return the JSON.
 `
         }
     ];
