@@ -51,13 +51,13 @@ const analysisAnswer = async (req, res, next) => {
             const textAnswer = await speechToTextTranscribe(file);
             const prompt = buildAnswerAnalysisPrompt(question, textAnswer);
             const aiAnalysis = await generateAIResponse(prompt);
-            const answer = await Answer.create({ questionId: questionId, textAnswer: textAnswer, score: aiAnalysis.score, aiEvaluation: aiAnalysis.aiEvaluation });
+            const answer = await Answer.create({ questionId: questionId, textAnswer: textAnswer, score: aiAnalysis.score, aiEvaluation: aiAnalysis.aiEvaluation, strengths: aiAnalysis.strengths, improvements: aiAnalysis.improvements });
             return res.status(200).json({ status: "SUCCESS", data: aiAnalysis });
         }
         const { answertext } = req.body;
         const prompt = buildAnswerAnalysisPrompt(question, answertext);
         const aiAnalysis = await generateAIResponse(prompt);
-        const answer = await Answer.create({ questionId: questionId, textAnswer: answertext, score: aiAnalysis.score, aiEvaluation: aiAnalysis.aiEvaluation });
+        const answer = await Answer.create({ questionId: questionId, textAnswer: answertext, score: aiAnalysis.score, aiEvaluation: aiAnalysis.aiEvaluation, strengths: aiAnalysis.strengths, improvements: aiAnalysis.improvements });
         res.status(200).json({ status: "SUCCESS", data: aiAnalysis });
     } catch (error) {
         return next(AppError.create("حدث خطأ أثناء عملية تحليل الجواب", 500, false));
