@@ -71,7 +71,7 @@ const speechToTextTranscribe = async (file) => {
             filename: file.originalname,
             contentType: file.mimetype
         });
-        const response = await axios.post("http://localhost:5000/transcribe", formData, {
+        const response = await axios.post("https://mocklyai-whisper-bacvgqgwcpenbaay.swedencentral-01.azurewebsites.net/transcribe", formData, {
             headers: {
                 ...formData.getHeaders()
             }
