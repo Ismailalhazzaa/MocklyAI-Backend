@@ -18,7 +18,7 @@ const server =  express();
 server.set('trust proxy', 1);
 // Define CORS options
 const corsOptions = {
-    origin: ["http://localhost:8080"],
+    origin: ["http://localhost:8080", "https://mockly-ai-frontend.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 };
