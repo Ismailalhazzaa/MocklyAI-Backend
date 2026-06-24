@@ -64,7 +64,7 @@ Rules:
 - Do NOT write anything outside JSON.
 - Return ONLY valid JSON with no extra text, no markdown, no backticks.
 
-Return ONLY this exact JSON structure with real values:
+Return ONLY this exact JSON structure with real values like this:
 {
     "score": 75,
     "aiEvaluation": {
@@ -77,6 +77,7 @@ Return ONLY this exact JSON structure with real values:
     "strengths": ["نقطة قوة أولى", "نقطة قوة ثانية"],
     "improvements": ["مجال تحسين أول", "مجال تحسين ثانٍ"]
 }
+Do NOT miss any values and DO NOT return empty vlaues
 If the candidate answer is written in Arabic, analyze it in Arabic.
 If it is mixed Arabic and English, understand both correctly.
 `
