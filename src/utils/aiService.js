@@ -13,18 +13,30 @@ const generateAIResponse = async (messages) => {
                 model: "nvidia/nemotron-3-nano-30b-a3b:free",
                 messages: messages,
                 temperature: 0.3,
-                response_format: { type: "json_object" } 
+                response_format: { type: "json_object" }
             })
         });
+
+        const rawContent = response.data.choices[0].message.content;
+        console.log("AI Raw Response:", rawContent); // ← مؤقت للتشخيص
         
-        const data = await response.data;
-        if (!response.status.toString().startsWith('2')) {
-            console.error("AI Error:", data);
-            throw new Error("AI request failed");
-        }
-        return JSON.parse(data.choices[0].message.content);
+        // تنظيف الـ response من backticks والنصوص الزائدة
+        const cleanContent = rawContent
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim();
+        
+        const parsed = JSON.parse(cleanContent);
+        
+        // تأكد من وجود جميع الحقول المطلوبة
+        return {
+            score: parsed.score ?? 0,
+            aiEvaluation: parsed.aiEvaluation ?? {},
+            strengths: parsed.strengths ?? [],
+            improvements: parsed.improvements ?? []
+        };
     } catch (error) {
-        console.error("AI Service Error:", error);
+        console.error("AI Service Error:", error.message);
         throw error;
     }
 };
