@@ -1,4 +1,6 @@
-const express = require("express") ; 
+require('dotenv').config();
+
+const express = require("express");
 const cors = require('cors');
 require("./config/databaseConnection");
 require("./config/firebase");
@@ -9,19 +11,24 @@ const sessionRoutes = require("./routes/session.routes");
 const questionRoutes = require("./routes/question.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const leaderboardRoutes = require("./routes/leaderboard.routes");
-require('dotenv').config() ;
 
-const PORT = process.env.PORT || 4000 ; 
+const PORT = process.env.PORT || 4000;
 
-const server =  express();
+const server = express();
 
-server.set('trust proxy', 1);
-// Define CORS options
+server.set('trust proxy', true);
+
 const corsOptions = {
-    origin: ["http://localhost:8080", "https://mockly-ai-frontend.vercel.app", "https://mocklyai.me", "https://www.mocklyai.me"],
+    origin: [
+        "http://localhost:8080",
+        "https://mockly-ai-frontend.vercel.app",
+        "https://mocklyai.me",
+        "https://www.mocklyai.me"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 };
+
 server.use(express.json());
 server.use(cors(corsOptions));
 server.use(express.urlencoded({ extended: true }));
@@ -32,8 +39,13 @@ server.use("/api/questions", questionRoutes);
 server.use("/api/dashboard", dashboardRoutes);
 server.use("/api/leaderboard", leaderboardRoutes);
 
-server.use((error,req,res,next)=>{
-    res.status(error.statusCode || 500).json({status:false ,message:error.message,errors:error.errors , data: null})
+server.use((error, req, res, next) => {
+    res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message,
+        errors: error.errors,
+        data: null
+    });
 });
 
 server.listen(PORT, () => {

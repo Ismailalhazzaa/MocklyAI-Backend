@@ -13,13 +13,12 @@ const generateAIResponse = async (messages) => {
                 model: "nvidia/nemotron-3-nano-30b-a3b:free",
                 messages: messages,
                 temperature: 0.3,
-                max_tokens: 1000,
+                max_tokens: 1500,
                 response_format: { type: "json_object" }
             })
         });
 
         const rawContent = response.data.choices[0].message.content;
-        
         const cleanContent = rawContent
             .replace(/```json/g, '')
             .replace(/```/g, '')
@@ -32,6 +31,4 @@ const generateAIResponse = async (messages) => {
     }
 };
 
-module.exports = {
-    generateAIResponse
-};
+module.exports = { generateAIResponse };
